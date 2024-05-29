@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beam Analysis Plot</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <form>
@@ -19,7 +20,7 @@
             </tr>
             <tr>
                 <td>Load Force (w)</td>
-                <td><input type="text" id="w"> kN/m</td>
+                <td><input type="text" id="w" value="10"> kN/m</td>
             </tr>
             <tr>
                 <td>Primary Span (L1)</td>
@@ -27,24 +28,12 @@
             </tr>
             <tr>
                 <td>Secondary Span (L2)</td>
-                <td><input type="text" id="secondarySpan" value=""> m</td>
+                <td><input type="text" id="secondarySpan" value="4"> m</td>
             </tr>
             <tr>
-                <td colspan="2"><hr></td>
-            </tr>
-            <tr>
-                <td>j2</td>
-                <td><input type="text" id="j2" value="2"></td>
-            </tr>
-            <tr>
-                <td>Bending Stiffnes (EI)</td>
+                <td>Bending Stiffness (EI)</td>
                 <td><input type="text" id="EI" value="3150000000000"> Nmm<sup>2</sup></td>
             </tr>
-
-            <tr>
-                <td colspan="2"><hr></td>
-            </tr>
-
             <tr>
                 <td colspan="2" style="text-align: center;">
                     <button type="button" id="calculate">Calculate</button>
@@ -60,42 +49,29 @@
     <script src="js/analysis-plotter.js"></script>
 
     <script>
-        /**
-         * Get float value of specified field
-         */
-        function floatVal(id) {
-            return parseFloat(
-                document.getElementById(id).value
-            );
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('calculate').addEventListener('click', function() {
+                var beam = new Beam(
+                    parseFloat(document.getElementById('primarySpan').value),
+                    parseFloat(document.getElementById('secondarySpan').value),
+                    new Material('No Name', { EI: parseFloat(document.getElementById('EI').value) })
+                );
 
-        function stringVal(id) {
-            return document.getElementById(id).value;
-        }
+                var condition = document.getElementById('condition').value;
+                var load = parseFloat(document.getElementById('w').value);
 
-        document.getElementById('calculate').addEventListener('click', function(e) {
-            var beam = new Beam();
+                var beamAnalysis = new BeamAnalysis();
 
-            beam.primarySpan    = floatVal('primarySpan');
-            beam.secondarySpan  = floatVal('secondarySpan');
-            beam.material       = new Material('No Name', {
-                EI : floatVal('EI')
+                var deflectionData = beamAnalysis.getDeflection(beam, load, condition).equation;
+                var bendingMomentData = beamAnalysis.getBendingMoment(beam, load, condition).equation;
+                var shearForceData = beamAnalysis.getShearForce(beam, load, condition).equation;
+
+                var plotter = new AnalysisPlotter();
+
+                plotter.plot('deflection_plot', deflectionData);
+                plotter.plot('shear_force_plot', shearForceData);
+                plotter.plot('bending_moment_plot', bendingMomentData);
             });
-
-            var plotter = {
-                deflection      : new AnalysisPlotter('deflection_plot'),
-                shearForce      : new AnalysisPlotter('shear_force_plot'),
-                bendingMoment   : new AnalysisPlotter('bending_moment_plot')
-            }
-
-            var beamAnalysis        = new BeamAnalysis();
-            var deflectionData      = beamAnalysis.getDeflection(beam, floatVal('w'), stringVal('condition'));
-            var bendingMomentData   = beamAnalysis.getBendingMoment(beam, floatVal('w'), stringVal('condition'));
-            var shearForceData      = beamAnalysis.getShearForce(beam, floatVal('w'), stringVal('condition'));
-
-            plotter.deflection.plot(deflectionData);
-            plotter.shearForce.plot(shearForceData);
-            plotter.bendingMoment.plot(bendingMomentData);
         });
     </script>
 </body>

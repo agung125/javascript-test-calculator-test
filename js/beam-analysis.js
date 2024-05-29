@@ -118,21 +118,22 @@ BeamAnalysis.analyzer.simplySupported.prototype = {
     },
 
     getBendingMomentEquation: function (beam, load) {
-        return function(x) {
+        return function (x) {
+            const span = beam.primarySpan;
             return {
-                x : x,
-                y : null
+                x: x,
+                y: (load * span * x) / 2
             };
-        }
+        };
     },
 
     getShearForceEquation: function (beam, load) {
-        return function(x) {
+        return function (x) {
             return {
-                x : x,
-                y : null
+                x: x,
+                y: load * (beam.primarySpan / 2 - x)
             };
-        }
+        };
     }
 };
 
@@ -149,29 +150,29 @@ BeamAnalysis.analyzer.twoSpanUnequal = function (beam, load) {
 
 BeamAnalysis.analyzer.twoSpanUnequal.prototype = {
     getDeflectionEquation: function (beam, load) {
-        return function(x) {
+        return function (x) {
             return {
-                x : x,
-                y : null
+                x: x,
+                y: -((load * Math.pow(x, 4)) / (24 * beam.material.properties.EI))
             };
-        }
+        };
     },
 
     getBendingMomentEquation: function (beam, load) {
-        return function(x) {
+        return function (x) {
             return {
-                x : x,
-                y : null
+                x: x,
+                y: (load * beam.primarySpan * x) / 2
             };
-        }
+        };
     },
 
     getShearForceEquation: function (beam, load) {
-        return function(x) {
+        return function (x) {
             return {
-                x : x,
-                y : null
+                x: x,
+                y: load * (beam.primarySpan / 2 - x)
             };
-        }
+        };
     }
 };
